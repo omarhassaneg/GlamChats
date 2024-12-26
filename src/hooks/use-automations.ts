@@ -176,10 +176,7 @@ export const useAutomationPosts = (id: string) => {
 export const useDeleteAutomation = () => {
   const { isPending, mutate } = useMutationData(
     ['delete-automation'],
-    async (data: { id: string }) => {
-      const result = await deleteAutomationAction(data.id)
-      return result
-    },
+    (data: { id: string }) => deleteAutomationAction(data.id),
     'user-automations'
   )
 

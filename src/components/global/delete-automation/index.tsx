@@ -3,8 +3,9 @@
 import React from 'react'
 import { Button } from '@/components/ui/button'
 import Loader from '../loader'
-import { useDeleteAutomation } from '@/hooks/use-automations'
+import { useDeleteAutomation } from '@/hooks/use-automations' 
 import { Trash2 } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,11 +23,20 @@ type Props = {
 }
 
 const DeleteAutomation = ({ automationId }: Props) => {
+  const queryClient = useQueryClient()
   const { isPending, mutate } = useDeleteAutomation()
 
   const handleDelete = async () => {
-    const result = await mutate({ id: automationId })
-    // The UI will update automatically through react-query cache invalidation
+    queryClient.setQueryData(['user-automations'], (old: any) => ({
+      ...old,
+      data: old?.data?.filter((automation: any) => automation.id !== automationId) || []
+    }))
+
+    await mutate({ id: automationId }, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['user-automations'] })
+      }
+    })
   }
 
   return (
