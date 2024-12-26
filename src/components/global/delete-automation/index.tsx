@@ -44,10 +44,10 @@ const DeleteAutomation = ({ automationId }: Props) => {
       <AlertDialogTrigger asChild>
         <Button
           variant="ghost"
-          size="icon"
-          className="hover:bg-red-500/10 hover:text-red-500"
+          size="sm"
+          className="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-full h-6 w-6 p-0"
         >
-          <Trash2 className="h-5 w-5" />
+          <Trash2 className="h-3 w-3" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>

@@ -1,11 +1,13 @@
-     'use client'
+'use client'
 
-import { usePaths } from '@/hooks/user-nav'
-import { cn, getMonth } from '@/lib/utils'
-import Link from 'next/link'
-import React, { useMemo } from 'react'
-import GradientButton from '../gradient-button'
 import { Button } from '@/components/ui/button'
+import GradientButton from '@/components/global/gradient-button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { cn, getMonth } from '@/lib/utils' 
+import { usePaths } from '@/hooks/user-nav'
+import { Trash2, X } from 'lucide-react'
+import Link from 'next/link'
+import React, { useMemo, useState } from 'react'
 import { useQueryAutomations } from '@/hooks/user-queries'
 import CreateAutomation from '../create-automation'
 import { useMutationDataState } from '@/hooks/use-mutation-data'
@@ -21,6 +23,8 @@ interface AutomationResponse {
 
 const AutomationList = (props: Props) => {
   const { data } = useQueryAutomations()
+  const [isSelecting, setIsSelecting] = useState(false)
+  const [selectedAutomations, setSelectedAutomations] = useState<string[]>([])
 
   const { latestVariable } = useMutationDataState(['create-automation'])
   const { pathname } = usePaths()
@@ -35,25 +39,90 @@ const AutomationList = (props: Props) => {
     return data || { status: 200, data: [] }
   }, [latestVariable, data])
 
+  const toggleSelect = (id: string) => {
+    setSelectedAutomations(prev => 
+      prev.includes(id) 
+        ? prev.filter(automationId => automationId !== id)
+        : [...prev, id]
+    )
+  }
+
+  const selectAll = () => {
+    setSelectedAutomations(optimisticUiData.data.map(automation => automation.id))
+  }
+
+  const cancelSelection = () => {
+    setIsSelecting(false)
+    setSelectedAutomations([])
+  }
   if (!optimisticUiData || optimisticUiData.status !== 200 || optimisticUiData.data.length <= 0) {
     return (
       <div className="h-[70vh] flex justify-center items-center flex-col gap-y-3">
-        <h3 className="text-lg text-gray-400">No Automations </h3>
+        <h3 className="text-lg text-gray-400">No Automations</h3>
         <CreateAutomation />
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-y-3">
-      {optimisticUiData.data.map((automation: Automation) => (
-        <div key={automation.id} className="relative">
-          <div className="flex justify-between items-center mb-2">
-            <DeleteAutomation automationId={automation.id} />
+    <div className="flex flex-col gap-y-3 relative">
+      <div className="flex justify-between items-center mb-6 sticky top-0 bg-background z-10 py-4 gap-4">
+        <CreateAutomation />
+        <Button
+          variant="outline"
+          onClick={() => setIsSelecting(true)}
+          className={cn("hover:bg-primary/10", isSelecting && "hidden")}
+        >
+          Select
+        </Button>
+        
+        {isSelecting && (
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              onClick={selectAll}
+              className="hover:bg-primary/10"
+            >
+              Select All
+            </Button>
+            <Button 
+              variant="destructive"
+              className={cn(
+                "bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-colors", 
+                selectedAutomations.length === 0 && "hidden"
+              )}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Selected
+            </Button>
+            <Button 
+              variant="ghost" 
+              onClick={cancelSelection}
+              className="hover:bg-primary/10"
+            >
+              <X className="w-4 h-4 mr-2" />
+              Cancel
+            </Button>
           </div>
+        )}
+      </div>
+      {optimisticUiData.data.map((automation: Automation) => (
+        <div key={automation.id} className="relative group">
+          {isSelecting && (
+            <div className="absolute -left-8 top-1/2 -translate-y-1/2 z-10">
+              <Checkbox
+                checked={selectedAutomations.includes(automation.id)}
+                onCheckedChange={() => toggleSelect(automation.id)}
+                className="h-5 w-5 border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+              />
+            </div>
+          )}
           <Link
             href={`${pathname}/${automation.id}`}
-            className="bg-[#1D1D1D] hover:opacity-80 transition duration-100 rounded-xl p-5 border-[1px] radial--gradient--automations flex border-[#545454]"
+            className={cn(
+              "bg-[#1D1D1D] hover:opacity-80 transition duration-100 rounded-xl p-5 border-[1px] radial--gradient--automations flex border-[#545454] relative",
+              isSelecting && "ml-6"
+            )}
           >
             <div className="flex flex-col flex-1 items-start">
               <h2 className="text-xl font-semibold">{automation.name}</h2>
@@ -99,18 +168,23 @@ const AutomationList = (props: Props) => {
 
               {automation.listener?.listener === 'SMARTAI' ? (
                 <GradientButton
-                  type="button"
-                  className="w-full bg-background-80 text-white hover:bg-background-80"
+                  type="BUTTON"
+                  className="w-full bg-background-80 text-white hover:bg-background-80 rounded-xl"
                 >
                   Smart AI
                 </GradientButton>
               ) : (
-                <Button className="bg-background-80 hover:bg-background-80 text-white">
+                <Button className="bg-background-80 hover:bg-background-80/80 text-white transition-colors">
                   Standard
                 </Button>
               )}
             </div>
           </Link>
+          {!isSelecting && (
+            <div className="absolute -right-3 -top-3 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+              <DeleteAutomation automationId={automation.id} />
+            </div>
+          )}
         </div>
       ))}
     </div>
