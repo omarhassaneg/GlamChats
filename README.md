@@ -94,7 +94,7 @@ NEXT_PUBLIC_NGROK_URL=your_ngrok_url
 2. Run Prisma migrations:
 ```bash
 # Install dependencies
-npm install
+npm install --legacy-peer-deps
 
 # Generate Prisma client
 npx prisma generate
@@ -124,7 +124,7 @@ ngrok http 3000
 
 1. Install dependencies:
 ```bash
-npm install
+npm install --legacy-peer-deps
 # or
 yarn install
 ```
