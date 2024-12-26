@@ -46,9 +46,24 @@ The application uses a PostgreSQL database with the following main models:
 - OpenAI API Key
 - Ngrok for local development
 
-### Environment Variables
+### Installation Steps
 
-Create a `.env` file with the following variables:
+1. Clone the repository and install dependencies:
+```bash
+npm install --legacy-peer-deps
+```
+
+2. Install Clerk:
+```bash
+npm install @clerk/nextjs --legacy-peer-deps
+```
+
+3. Get your database URL from Neon.tech:
+   - Sign up at [neon.tech](https://neon.tech)
+   - Create a new project
+   - Get your connection string from the dashboard
+
+4. Set up environment variables by creating a `.env` file with the following:
 
 ```env
 # Database
@@ -83,19 +98,8 @@ NEXT_PUBLIC_HOST_URL=http://localhost:3000
 NEXT_PUBLIC_NGROK_URL=your_ngrok_url
 ```
 
-### Database Setup
-
-1. Get your database URL from Neon.tech:
-   - Sign up at [neon.tech](https://neon.tech)
-   - Create a new project
-   - Get your connection string from the dashboard
-   - Replace the DATABASE_URL in your .env file
-
-2. Run Prisma migrations:
+5. Set up the database:
 ```bash
-# Install dependencies
-npm install --legacy-peer-deps
-
 # Generate Prisma client
 npx prisma generate
 
@@ -106,37 +110,23 @@ npx prisma migrate dev
 npx prisma db seed
 ```
 
-### Ngrok Setup for Webhook Testing
-
-1. Install ngrok:
-```bash
-npm install -g ngrok
-```
-
-2. Start ngrok:
-```bash
-ngrok http 3000
-```
-
-3. Copy the HTTPS URL provided by ngrok and add it to your .env file as NEXT_PUBLIC_NGROK_URL
-
-### Running the Application
-
-1. Install dependencies:
-```bash
-npm install --legacy-peer-deps
-# or
-yarn install
-```
-
-2. Run the development server:
+6. Start the development server:
 ```bash
 npm run dev
-# or
-yarn dev
 ```
 
-3. Open [http://localhost:3000](http://localhost:3000) in your browser
+7. In a new terminal, set up Ngrok for webhook testing:
+```bash
+# Install ngrok globally
+npm install -g ngrok
+
+# Start ngrok (replace 3000 with your local development server port)
+ngrok http http://localhost:3000
+```
+
+8. Copy the HTTPS URL provided by ngrok and update it in your .env file as NEXT_PUBLIC_NGROK_URL
+
+9. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ## Production Deployment
 
