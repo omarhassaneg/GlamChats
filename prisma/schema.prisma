@@ -47,17 +47,29 @@ model Integrations {
 }
 
 model Automation {
-  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String    @default("Untitled")
-  createdAt DateTime  @default(now())
-  active    Boolean   @default(false)
-  trigger   Trigger[]
-  listener  Listener?
-  posts     Post[]
-  dms       Dms[]
-  User      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String?   @db.Uuid
-  keywords  Keyword[]
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String        @default("Untitled")
+  createdAt   DateTime      @default(now())
+  active      Boolean       @default(false)
+  trigger     Trigger[]
+  listener    Listener?
+  posts       Post[]
+  dms         Dms[]
+  User        User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String?       @db.Uuid
+  keywords    Keyword[]
+  testMessages TestMessage[]
+}
+
+model TestMessage {
+  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  content      String
+  response     String?
+  createdAt    DateTime    @default(now())
+  Automation   Automation  @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  automationId String      @db.Uuid
+  matched      Boolean     @default(false)
+  matchedKeyword String?
 }
 
 model Dms {

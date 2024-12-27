@@ -171,3 +171,17 @@ export const addPost = async (
     },
   })
 }
+
+// Clean up test messages older than 24 hours
+export const cleanupTestMessages = async (automationId: string) => {
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+  
+  return await client.testMessage.deleteMany({
+    where: {
+      automationId,
+      createdAt: {
+        lt: oneDayAgo
+      }
+    }
+  })
+}
