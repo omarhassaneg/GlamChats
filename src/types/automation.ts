@@ -1,5 +1,3 @@
- ``                                                                                                                                                                                                                                                                                                                                                                                                                                                               export type LISTENERS = 'SMARTAI' | 'MESSAGE'
-
 export interface Keyword {
   id: string
   word: string
@@ -8,32 +6,36 @@ export interface Keyword {
 
 export interface Listener {
   id: string
-  automationId: string
-  listener: LISTENERS
+  automationId: striyng
+  listener: 'MESSAGE' | 'SMARTAI'
   prompt: string
   commentReply: string | null
   dmCount: number
   commentCount: number
 }
 
+export interface Trigger {
+  id: string
+  type: string
+  automationId: string | null
+}
+
+export interface TestMessage {
+  id: string
+  content: string
+  isUserMessage: boolean
+  createdAt: string
+  automationId: string | null
+}
+
 export interface Automation {
   id: string
   name: string
-  createdAt: Date | string
+  createdAt: string
   active: boolean
-  keywords: {
-    id: string
-    automationId: string | null
-    word: string
-  }[]
-  listener: {
-    id: string
-    automationId: string
-    listener: LISTENERS
-    prompt: string
-    commentReply: string | null
-    dmCount: number
-    commentCount: number
-  } | null
-  userId?: string
+  userId: string | null
+  trigger: Trigger[]
+  listener: Listener | null
+  keywords: Keyword[]
+  testMessages: TestMessage[]
 }
