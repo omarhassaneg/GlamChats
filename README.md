@@ -38,7 +38,7 @@ The application uses a PostgreSQL database with the following main models:
 
 ### Prerequisites
 
-- Node.js 18+ and npm/yarn
+- Node.js 18+ and yarn
 - PostgreSQL database
 - Instagram Developer Account
 - Clerk Account
@@ -50,12 +50,12 @@ The application uses a PostgreSQL database with the following main models:
 
 1. Clone the repository and install dependencies:
 ```bash
-npm install --legacy-peer-deps
+yarn install --legacy-peer-deps
 ```
 
 2. Install Clerk:
 ```bash
-npm install @clerk/nextjs --legacy-peer-deps
+yarn add @clerk/nextjs --legacy-peer-deps
 ```
 
 3. Get your database URL from Neon.tech:
@@ -101,24 +101,24 @@ NEXT_PUBLIC_NGROK_URL=your_ngrok_url
 5. Set up the database:
 ```bash
 # Generate Prisma client
-npx prisma generate
+yarn prisma generate
 
 # Run migrations
-npx prisma migrate dev
+yarn prisma migrate dev
 
 # Seed database (if needed)
-npx prisma db seed
+yarn prisma db seed
 ```
 
 6. Start the development server:
 ```bash
-npm run dev
+yarn dev
 ```
 
 7. In a new terminal, set up Ngrok for webhook testing:
 ```bash
 # Install ngrok globally
-npm install -g ngrok
+yarn global add ngrok
 
 # Start ngrok (replace 3000 with your local development server port)
 ngrok http http://localhost:3000
@@ -132,12 +132,12 @@ ngrok http http://localhost:3000
 
 1. Build the application:
 ```bash
-npm run build
+yarn build
 ```
 
 2. Start the production server:
 ```bash
-npm start
+yarn start
 ```
 
 ## Features
