@@ -20,12 +20,9 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body
-          suppressHydrationWarning
-          className={jakarta.className}
-        >
+    <html lang="en" suppressHydrationWarning>
+      <body className={jakarta.className}>
+        <ClerkProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"
@@ -34,11 +31,10 @@ export default function RootLayout({
             <ReduxProvider>
               <ReactQueryProvider>{children}</ReactQueryProvider>
             </ReduxProvider>
-
             <Toaster />
           </ThemeProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+        </ClerkProvider>
+      </body>
+    </html>
   )
 }
