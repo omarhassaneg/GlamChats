@@ -48,8 +48,11 @@ const Sidebar = ({ slug }: Props) => {
        backdrop--blur__safari 
        backdrop-blur-3xl"
       >
-        <div className="flex gap-x-2 items-center p-5 justify-center">
-          <LogoSmall />
+        <div className="flex items-center gap-2 p-5">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#3352CC] to-[#1C2D70] flex items-center justify-center">
+            <span className="text-xl font-bold text-white">GC</span>
+          </div>
+          <span className="text-xl font-semibold text-white">GlamChats</span>
         </div>
         <div className="flex flex-col py-3">
           <Items
