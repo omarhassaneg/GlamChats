@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { useKeywords, useListener } from "@/hooks/use-automations";
+import { useListener } from "@/hooks/use-automations";
 
 interface Message {
   id: string;
@@ -13,6 +13,30 @@ interface Message {
   type: "sent" | "received";
   timestamp: Date;
 }
+
+// Function to detect and convert URLs to clickable links
+const formatMessageContent = (content: string) => {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = content.split(urlRegex);
+  
+  return parts.map((part, index) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 hover:text-blue-600 underline break-all"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {part}
+        </a>
+      );
+    }
+    return <span key={index}>{part}</span>;
+  });
+};
 
 export function TestChat({ automationId }: { automationId: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -93,7 +117,7 @@ export function TestChat({ automationId }: { automationId: string }) {
   };
 
   return (
-    <div className="fixed right-4 top-24 w-[400px] h-[calc(100vh-120px)] bg-background border rounded-lg shadow-lg flex flex-col z-50">
+    <div className="fixed right-4 top-24 w-[90%] sm:w-[400px] max-w-[400px] h-[calc(100vh-120px)] bg-background border rounded-lg shadow-lg flex flex-col z-50">
       <div className="p-4 border-b">
         <h3 className="font-semibold">Test Automation Chat</h3>
         <p className="text-sm text-muted-foreground">
@@ -118,14 +142,16 @@ export function TestChat({ automationId }: { automationId: string }) {
               >
                 <div
                   className={cn(
-                    "max-w-[80%] rounded-lg p-3",
+                    "max-w-[90%] rounded-lg p-3 break-words",
                     message.type === "sent"
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted"
                   )}
                 >
-                  <p className="text-sm">{message.content}</p>
-                  <span className="text-xs opacity-70">
+                  <div className="text-sm">
+                    {formatMessageContent(message.content)}
+                  </div>
+                  <span className="text-xs opacity-70 block mt-1">
                     {message.timestamp.toLocaleTimeString()}
                   </span>
                 </div>
@@ -143,6 +169,7 @@ export function TestChat({ automationId }: { automationId: string }) {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
+            className="flex-1"
           />
           <Button onClick={handleSendMessage}>Send</Button>
         </div>
