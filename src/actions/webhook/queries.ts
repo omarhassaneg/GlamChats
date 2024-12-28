@@ -1,7 +1,8 @@
 import { client } from '@/lib/prisma'
 
 export const matchKeyword = async (keyword: string) => {
-  return await client.keyword.findFirst({
+  console.log('🔵 Matching Keyword:', { keyword })
+  const match = await client.keyword.findFirst({
     where: {
       word: {
         equals: keyword,
@@ -9,17 +10,27 @@ export const matchKeyword = async (keyword: string) => {
       },
     },
   })
+  console.log('🔵 Keyword Match Result:', {
+    found: match !== null,
+    keywordId: match?.id,
+    automationId: match?.automationId
+  })
+  return match
 }
 
 export const getKeywordAutomation = async (
   automationId: string,
   dm: boolean
 ) => {
-  return await client.automation.findUnique({
+  console.log('🔵 Fetching Automation:', {
+    automationId,
+    type: dm ? 'DM' : 'COMMENT'
+  })
+  
+  const automation = await client.automation.findUnique({
     where: {
       id: automationId,
     },
-
     include: {
       dms: dm,
       trigger: {
@@ -44,31 +55,65 @@ export const getKeywordAutomation = async (
       },
     },
   })
+
+  console.log('🔵 Automation Details:', {
+    found: automation !== null,
+    hasListener: automation?.listener !== null,
+    triggerCount: automation?.trigger.length,
+    hasValidToken: automation?.User?.integrations[0]?.token !== null,
+    subscriptionPlan: automation?.User?.subscription?.plan
+  })
+
+  return automation
 }
 export const trackResponses = async (
   automationId: string,
   type: 'COMMENT' | 'DM'
 ) => {
-  if (type === 'COMMENT') {
-    return await client.listener.update({
-      where: { automationId },
-      data: {
-        commentCount: {
-          increment: 1,
-        },
-      },
-    })
-  }
+  console.log('🔵 Tracking Response:', {
+    automationId,
+    type
+  })
 
-  if (type === 'DM') {
-    return await client.listener.update({
-      where: { automationId },
-      data: {
-        dmCount: {
-          increment: 1,
+  try {
+    let result;
+    if (type === 'COMMENT') {
+      result = await client.listener.update({
+        where: { automationId },
+        data: {
+          commentCount: {
+            increment: 1,
+          },
         },
-      },
+      })
+      console.log('🟢 Comment Count Updated:', {
+        automationId,
+        newCount: result.commentCount
+      })
+    }
+
+    if (type === 'DM') {
+      result = await client.listener.update({
+        where: { automationId },
+        data: {
+          dmCount: {
+            increment: 1,
+          },
+        },
+      })
+      console.log('🟢 DM Count Updated:', {
+        automationId,
+        newCount: result.dmCount
+      })
+    }
+    return result
+  } catch (error: any) {
+    console.error('🔴 Response Tracking Error:', {
+      automationId,
+      type,
+      error: error.message
     })
+    throw error
   }
 }
 
@@ -78,20 +123,37 @@ export const createChatHistory = (
   reciever: string,
   message: string
 ) => {
-  return client.automation.update({
-    where: {
-      id: automationId,
-    },
-    data: {
-      dms: {
-        create: {
-          reciever,
-          senderId: sender,
-          message,
+  console.log('🔵 Creating Chat History:', {
+    automationId,
+    sender,
+    reciever,
+    messageLength: message.length
+  })
+
+  try {
+    const result = client.automation.update({
+      where: {
+        id: automationId,
+      },
+      data: {
+        dms: {
+          create: {
+            reciever,
+            senderId: sender,
+            message,
+          },
         },
       },
-    },
-  })
+    })
+    console.log('🟢 Chat History Created')
+    return result
+  } catch (error: any) {
+    console.error('🔴 Chat History Creation Error:', {
+      automationId,
+      error: error.message
+    })
+    throw error
+  }
 }
 
 export const getKeywordPost = async (postId: string, automationId: string) => {
@@ -104,24 +166,54 @@ export const getKeywordPost = async (postId: string, automationId: string) => {
 }
 
 export const getChatHistory = async (sender: string, reciever: string) => {
-  const history = await client.dms.findMany({
-    where: {
-      AND: [{ senderId: sender }, { reciever }],
-    },
-    orderBy: { createdAt: 'asc' },
-  })
-  const chatSession: {
-    role: 'assistant' | 'user'
-    content: string
-  }[] = history.map((chat) => {
-    return {
-      role: chat.reciever ? 'assistant' : 'user',
-      content: chat.message!,
-    }
+  console.log('🔵 Fetching Chat History:', {
+    sender,
+    reciever
   })
 
-  return {
-    history: chatSession,
-    automationId: history[history.length - 1].automationId,
+  try {
+    const history = await client.dms.findMany({
+      where: {
+        AND: [{ senderId: sender }, { reciever }],
+      },
+      orderBy: { createdAt: 'asc' },
+    })
+
+    console.log('🔵 Chat History Found:', {
+      messageCount: history.length,
+      timespan: history.length > 0 ? {
+        first: history[0].createdAt,
+        last: history[history.length - 1].createdAt
+      } : null
+    })
+
+    const chatSession: {
+      role: 'assistant' | 'user'
+      content: string
+    }[] = history.map((chat) => {
+      return {
+        role: chat.reciever ? 'assistant' : 'user',
+        content: chat.message!,
+      }
+    })
+
+    const result = {
+      history: chatSession,
+      automationId: history[history.length - 1]?.automationId,
+    }
+
+    console.log('🟢 Chat History Processed:', {
+      messageCount: chatSession.length,
+      hasAutomationId: !!result.automationId
+    })
+
+    return result
+  } catch (error: any) {
+    console.error('🔴 Chat History Retrieval Error:', {
+      sender,
+      reciever,
+      error: error.message
+    })
+    throw error
   }
 }

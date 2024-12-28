@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
             automation.listener &&
             automation.listener.listener === 'MESSAGE'
           ) {
-            const direct_message = await sendDM(
+            const direct_message = await sendPrivateMessage(
               webhook_payload.entry[0].id,
               webhook_payload.entry[0].messaging[0].sender.id,
               automation.listener?.prompt,
